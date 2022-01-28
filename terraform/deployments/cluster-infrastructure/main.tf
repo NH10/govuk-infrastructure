@@ -19,8 +19,9 @@ terraform {
 }
 
 locals {
+  cluster_name               = terraform.workspace == "default" ? "govuk" : terraform.workspace
   cluster_services_namespace = "cluster-services"
-  secrets_prefix             = "govuk"
+  secrets_prefix             = local.cluster_name
 
   # module.eks.cluster_oidc_issuer_url is a full URL, e.g.
   # "https://oidc.eks.eu-west-1.amazonaws.com/id/B4378A8EBD334FEEFDF3BCB6D0E612C6"
@@ -30,8 +31,9 @@ locals {
   cluster_oidc_issuer = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
 
   default_tags = {
-    cluster              = var.cluster_name
+    cluster              = local.cluster_name
     project              = "replatforming"
+    workspace            = terraform.workspace
     repository           = "govuk-infrastructure"
     terraform_deployment = basename(abspath(path.root))
   }
@@ -46,7 +48,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "17.20.0"
 
-  cluster_name     = var.cluster_name
+  cluster_name     = local.cluster_name
   cluster_version  = var.cluster_version
   subnets          = [for s in aws_subnet.eks_control_plane : s.id]
   vpc_id           = data.terraform_remote_state.infra_vpc.outputs.vpc_id
@@ -80,7 +82,7 @@ module "eks" {
       instance_types   = var.workers_instance_types
       additional_tags = {
         "k8s.io/cluster-autoscaler/enabled"             = "true"
-        "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
+        "k8s.io/cluster-autoscaler/${local.cluster_name}" = "owned"
       }
     }
   ]

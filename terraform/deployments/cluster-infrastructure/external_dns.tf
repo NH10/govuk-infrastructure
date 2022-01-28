@@ -8,14 +8,14 @@
 
 locals {
   external_dns_service_account_name = "external-dns"
-  external_dns_zone_name            = trimsuffix("${var.external_dns_subdomain}.${data.terraform_remote_state.infra_root_dns_zones.outputs.external_root_domain_name}", ".")
+  external_dns_zone_name            = trimsuffix("${var.external_dns_subdomain}-${terraform.workspace}.${data.terraform_remote_state.infra_root_dns_zones.outputs.external_root_domain_name}", ".")
 }
 
 module "external_dns_iam_role" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.3.0"
   create_role                   = true
-  role_name                     = "${local.external_dns_service_account_name}-${var.cluster_name}"
+  role_name                     = "${local.external_dns_service_account_name}-${local.cluster_name}"
   role_description              = "Role for External DNS addon. Corresponds to ${local.external_dns_service_account_name} k8s ServiceAccount."
   provider_url                  = local.cluster_oidc_issuer
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
@@ -23,7 +23,7 @@ module "external_dns_iam_role" {
 }
 
 resource "aws_iam_policy" "external_dns" {
-  name        = "EKSExternalDNS-${var.cluster_name}"
+  name        = "EKSExternalDNS-${local.cluster_name}"
   description = "EKS ${local.external_dns_service_account_name} policy for cluster ${module.eks.cluster_id}"
   policy      = data.aws_iam_policy_document.external_dns.json
 }
@@ -52,7 +52,7 @@ resource "aws_route53_zone" "cluster_public" {
 
 resource "aws_route53_record" "cluster_public_ns_parent" {
   zone_id = data.terraform_remote_state.infra_root_dns_zones.outputs.external_root_zone_id
-  name    = var.external_dns_subdomain
+  name    = "${var.external_dns_subdomain}-${terraform.workspace}"
   type    = "NS"
   ttl     = 21600
   records = aws_route53_zone.cluster_public.name_servers

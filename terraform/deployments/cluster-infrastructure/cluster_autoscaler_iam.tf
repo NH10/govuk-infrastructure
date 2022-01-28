@@ -24,7 +24,7 @@ module "cluster_autoscaler_iam_role" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.3.0"
   create_role                   = true
-  role_name                     = "${local.cluster_autoscaler_service_account_name}-${var.cluster_name}"
+  role_name                     = "${local.cluster_autoscaler_service_account_name}-${local.cluster_name}"
   role_description              = "Role for Cluster Autoscaler. Corresponds to ${local.cluster_autoscaler_service_account_name} k8s ServiceAccount."
   provider_url                  = local.cluster_oidc_issuer
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
@@ -32,7 +32,7 @@ module "cluster_autoscaler_iam_role" {
 }
 
 resource "aws_iam_policy" "cluster_autoscaler" {
-  name        = "EKSClusterAutoscaler-${var.cluster_name}"
+  name        = "EKSClusterAutoscaler-${local.cluster_name}"
   description = "EKS cluster-autoscaler policy for cluster ${module.eks.cluster_id}"
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
 }

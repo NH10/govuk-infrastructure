@@ -13,7 +13,7 @@ module "aws_lb_controller_iam_role" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.3.0"
   create_role                   = true
-  role_name                     = "${local.aws_lb_controller_service_account_name}-${var.cluster_name}"
+  role_name                     = "${local.aws_lb_controller_service_account_name}-${local.cluster_name}"
   role_description              = "Role for the AWS Load Balancer Controller. Corresponds to ${local.aws_lb_controller_service_account_name} k8s ServiceAccount."
   provider_url                  = local.cluster_oidc_issuer
   role_policy_arns              = [aws_iam_policy.aws_lb_controller.arn]
@@ -21,7 +21,7 @@ module "aws_lb_controller_iam_role" {
 }
 
 resource "aws_iam_policy" "aws_lb_controller" {
-  name        = "AWSLoadBalancerController-${var.cluster_name}"
+  name        = "AWSLoadBalancerController-${local.cluster_name}"
   description = "Allow AWS Load Balancer Controller to manage ALBs/NLBs etc."
 
   # The argument to jsonencode() is the verbatim contents of

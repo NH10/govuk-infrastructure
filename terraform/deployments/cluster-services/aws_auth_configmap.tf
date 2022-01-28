@@ -44,7 +44,7 @@ locals {
 
 resource "kubernetes_config_map" "aws_auth" {
   metadata {
-    name      = "aws-auth"
+    name      = "aws-auth-${data.terraform_remote_state.cluster_infrastructure.outputs.cluster_id}"
     namespace = "kube-system"
     labels    = { "app.kubernetes.io/managed-by" = "Terraform" }
   }

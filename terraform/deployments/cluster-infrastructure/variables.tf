@@ -8,12 +8,6 @@ variable "cluster_log_retention_in_days" {
   description = "Number of days to retain cluster log events in CloudWatch."
 }
 
-variable "cluster_name" {
-  type        = string
-  description = "Name for the EKS cluster."
-  default     = "govuk"
-}
-
 variable "cluster_version" {
   type        = string
   description = "Kubernetes release version for the cluster, e.g. 1.21"
